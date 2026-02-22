@@ -2,7 +2,9 @@ import json
 import schedule
 import time
 from datetime import datetime
-from sheets_helper import get_sheet_service, insert_event
+from sheets_helper import get_sheet_service, insert_event, ensure_month_sheet_exists
+import calendar
+
 
 # ----- Setup Google Sheets -----
 CREDENTIALS_FILE = 'credentials.json'
@@ -23,7 +25,15 @@ def process_work_events():
             start_dt = datetime.strptime(event['start'], fmt)
             end_dt = datetime.strptime(event['end'], fmt)
             total_hours = (end_dt - start_dt).seconds / 3600
-            insert_event(sheet, SPREADSHEET_ID, RANGE_NAME, event, total_hours)
+            # Month name from event date
+            event_date = datetime.strptime(event['date'], "%Y-%m-%d")
+            month_name = calendar.month_name[event_date.month] + f" {event_date.year}"
+
+            # Ensure sheet exists
+            ensure_month_sheet_exists(sheet, SPREADSHEET_ID, month_name)
+
+            # Append event to proper sheet
+            insert_event(sheet, SPREADSHEET_ID, month_name, event, total_hours)
 
 # Schedule: run once daily at 20:00
 schedule.every().day.at("20:00").do(process_work_events)
