@@ -1,6 +1,6 @@
-# DailyWorkMCP
+# DailyWorkHelper
 
-**DailyWorkMCP** is an autonomous MCP agent that scans your Google Calendar for "work" events and automatically logs them into a Google Sheet, calculating **total hours** for each event.
+**DailyWorkHelper** is an scheduled automation bot that scans your Google Calendar for "work" events and automatically logs them into a Google Sheet, calculating **total hours** for each event.
 
 ---
 
@@ -24,5 +24,6 @@
 ```bash
 python3 -m venv venv                                           
 source venv/bin/activate 
+pip install --upgrade pip
 pip install -r requirements.txt
-python3 mcp_main.py
+python3 helper_main.py

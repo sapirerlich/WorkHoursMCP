@@ -53,6 +53,18 @@ def insert_event(sheet, spreadsheet_id, range_name, event, total_hours):
     print(f"Inserted: {event['date']} | {event['start']}-{event['end']} | {total_hours:.2f} hours")
 
 
+def date_exists(sheet, spreadsheet_id, sheet_name, date_str):
+    """Check if a date already exists in column A of the given sheet."""
+    result = sheet.values().get(
+        spreadsheetId=spreadsheet_id,
+        range=f"{sheet_name}!A:A"  # look only in column A
+    ).execute()
+    values = result.get('values', [])
+    
+    # Flatten the list and compare
+    existing_dates = [row[0] for row in values if row]
+    return date_str in existing_dates
+
 
 def ensure_month_sheet_exists(service, spreadsheet_id, month_name):
     """Check if a sheet with month_name exists, if not, create it."""

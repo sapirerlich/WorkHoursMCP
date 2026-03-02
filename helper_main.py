@@ -4,7 +4,7 @@ from datetime import datetime, timedelta
 import os
 from dotenv import load_dotenv
 
-from sheets_helper import *
+from sheets_util import *
 
 load_dotenv()
 
@@ -69,19 +69,21 @@ def process_work_events():
             ensure_month_sheet_exists(sheet, SPREADSHEET_ID, month_name)
 
             print("Inserting event into sheet...")
-            insert_event(
-                sheet,
-                SPREADSHEET_ID,
-                month_name,
-                {
-                    "date": event_date,
-                    "start": start_dt.strftime("%H:%M"),
-                    "end": end_dt.strftime("%H:%M")
-                },
-                total_hours
-            )
-
-            print("✓ Successfully inserted")
+            if date_exists(sheet, SPREADSHEET_ID, month_name, event_date):
+                print(f"→ Skipping {event_date}, already added")
+            else:
+                insert_event(
+                    sheet,
+                    SPREADSHEET_ID,
+                    month_name,
+                    {
+                        "date": event_date,
+                        "start": start_dt.strftime("%H:%M"),
+                        "end": end_dt.strftime("%H:%M")
+                    },
+                    total_hours
+                )
+                print(f"✓ Successfully inserted {event_date}")
 
         except Exception as e:
             print("ERROR processing event:")
@@ -91,10 +93,10 @@ def process_work_events():
     print("--------------------------------------------------")
 
 # Schedule: run once daily at 20:00
-schedule.every().day.at("20:00").do(process_work_events)
+schedule.every().day.at("12:50").do(process_work_events)
 
 
-print("MCP Scheduler started. Press Ctrl+C to stop.")
+print("Work Hours Bot started. Press Ctrl+C to stop.")
 while True:
     schedule.run_pending()
     time_module.sleep(30)
