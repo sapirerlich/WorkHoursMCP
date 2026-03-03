@@ -1,30 +1,14 @@
-import schedule
-import time as time_module
-from datetime import datetime, timedelta
-import os
-from dotenv import load_dotenv
-
+from datetime import datetime
 from sheets_util import *
+from config import * 
 
-load_dotenv()
-
-CREDENTIALS_FILE = os.getenv("CREDENTIALS_FILE")
-SPREADSHEET_ID = os.getenv("SPREADSHEET_ID")
-RANGE_NAME = os.getenv("RANGE_NAME")
-CALENDAR_ID = os.getenv("CALENDAR_ID")
-
-
-calendar_service = get_calendar_service(CREDENTIALS_FILE)
-
-sheet = get_sheet_service(CREDENTIALS_FILE)
-
-def process_work_events():
+def process_work_events(calendar_service, sheet, calendar_id, spreadsheet_id):
     print("--------------------------------------------------")
     print("Starting work event processing...")
     
     try:
         print("Fetching events from Google Calendar...")
-        events = get_today_events(calendar_service, CALENDAR_ID)
+        events = get_today_events(calendar_service, calendar_id)
         print(f"Total events fetched: {len(events)}")
 
     except Exception as e:
@@ -66,15 +50,15 @@ def process_work_events():
             print(f"→ Target sheet: {month_name}")
 
             print("Ensuring month sheet exists...")
-            ensure_month_sheet_exists(sheet, SPREADSHEET_ID, month_name)
+            ensure_month_sheet_exists(sheet, spreadsheet_id, month_name)
 
             print("Inserting event into sheet...")
-            if date_exists(sheet, SPREADSHEET_ID, month_name, event_date):
+            if date_exists(sheet, spreadsheet_id, month_name, event_date):
                 print(f"→ Skipping {event_date}, already added")
             else:
                 insert_event(
                     sheet,
-                    SPREADSHEET_ID,
+                    spreadsheet_id,
                     month_name,
                     {
                         "date": event_date,
@@ -92,11 +76,14 @@ def process_work_events():
     print("Finished processing events.")
     print("--------------------------------------------------")
 
-# Schedule: run once daily at 20:00
-schedule.every().day.at("20:00").do(process_work_events)
+def main():
+    config = load_config()
+    calendar_id = config['calendar_id']
+    spreadsheet_id = config['spreadsheet_id']
+    calendar_service = get_calendar_service(config['creds'])
+    sheet = get_sheet_service(config['creds'])
+    process_work_events(calendar_service, sheet, calendar_id, spreadsheet_id)
 
-
-print("Work Hours Bot started. Press Ctrl+C to stop.")
-while True:
-    schedule.run_pending()
-    time_module.sleep(30)
+if __name__ == "__main__":
+    print("Work Hours Bot started")
+    main()

@@ -1,0 +1,33 @@
+name: Daily WorkHoursHelper
+
+on:
+  schedule:
+    - cron: "0 20 * * *"    # runs daily at 12:00 UTC
+  workflow_dispatch:        # allows manual triggering
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repo
+        uses: actions/checkout@v3
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r requirements.txt
+
+      - name: Run WorkHoursHelper
+        env:
+          CREDENTIALS_FILE: ${{ secrets.CREDENTIALS_FILE }}
+          SPREADSHEET_ID: ${{ secrets.SPREADSHEET_ID }}
+          RANGE_NAME: ${{ secrets.RANGE_NAME }}
+          CALENDAR_ID: ${{ secrets.CALENDAR_ID }}
+        run: |
+          python helper_main.py

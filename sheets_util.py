@@ -1,21 +1,12 @@
-from google.oauth2.service_account import Credentials
 from googleapiclient.discovery import build
 from datetime import datetime,timedelta, timezone
 
-
-SCOPES = [
-    'https://www.googleapis.com/auth/spreadsheets',
-    'https://www.googleapis.com/auth/calendar.readonly'
-]
-
-def get_calendar_service(credentials_file):
-    creds = Credentials.from_service_account_file(credentials_file, scopes=SCOPES)
+def get_calendar_service(creds):
     service = build('calendar', 'v3', credentials=creds)
     return service
 
 
-def get_sheet_service(credentials_file):
-    creds = Credentials.from_service_account_file(credentials_file, scopes=SCOPES)
+def get_sheet_service(creds):
     service = build('sheets', 'v4', credentials=creds)
     return service.spreadsheets()
 
